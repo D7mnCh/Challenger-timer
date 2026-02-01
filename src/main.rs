@@ -90,6 +90,7 @@ impl eframe::App for State {
     }
 }
 /*
+ *
     the plan
  - Update a bit README
  - passing arguments using data instance of Data struct, and not via passing all it fields -.-

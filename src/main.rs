@@ -27,10 +27,12 @@ fn main() -> eframe::Result {
         Box::new(|cc| Ok(Box::new(State::new(cc)))),
     )
 }
+#[derive(Clone)]
 struct Data {
-    reference_instant: Instant,
-    seconds: u64,
-    minutes: u64,
+    // i think i need pause to be here in data that all components can share and interect with it
+    instant: Instant,
+    secs: u64,
+    mins: u64,
     hours: u64,
 }
 struct State {
@@ -41,49 +43,58 @@ struct State {
 impl State {
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
         Self {
-            data: Data{
-                reference_instant: Instant::now(),
-                seconds: 0,
-                minutes: 0,
+            data: Data {
+                instant: Instant::now(),
+                secs: 0,
+                mins: 0,
                 hours: 0,
             },
             static_comp: StaticComp {
                 ..Default::default()
             },
-            intr_comp: IntrComp{
+            intr_comp: IntrComp {
                 ..Default::default()
-            }
+            },
         }
     }
     fn update_time_meseurment(&mut self) {
-        // Math logic
-        self.data.seconds = self.data.reference_instant.elapsed().as_secs() /* + self.data.secs */;
-        self.data.minutes = self.data.seconds / 60 ; 
-        self.data.hours   = self.data.seconds / (60 * 60) ;
+        if self.data.instant.elapsed().as_secs() == 1 {
+            self.data.secs    += self.data.instant.elapsed().as_secs();
+            self.data.mins    = self.data.secs / 60;
+            self.data.hours   = self.data.secs / (60 * 60);
+
+            self.data.instant = Instant::now();
+        }
     }
 }
 impl eframe::App for State {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         ctx.request_repaint();
         self.update_time_meseurment();
+        //
+        // begin here and solve this
+        // i wanna make self.data.instant have 1 as a value not bigger then that
+        // the self.data.secs have normal value or in other word he's the only who own the value of second
+        // i get an idea to updata it everytime here, using plus one to self.data.instant cause it will be always be zero
         egui::CentralPanel::default().show(ctx, |ui| {
+            // whait, i can just the whole data struct, didn't think of that
             self.static_comp.display(
                 ui,
-                &mut self.data.seconds,
-                &self.data.minutes, 
-                &self.data.hours);
+                &mut self.data
+            );
             self.intr_comp.display(
                 ui,
-                &mut self.data.seconds,
-                &self.data.minutes, 
-                &self.data.hours)
+                &mut self.data
+            )
         });
     }
 }
-/* 
+/*
     the plan
- - put the data in the structs that use it
- - ok so i faced a problem of the update don't appear only if i haver my mouse the window, or when i made a keyboard input (solved)
- - implementing buttoms to stop the secs (i could use other Instant checkpoint thing and then substract it on the main one)
-*/
+ - Update a bit README
+ - passing arguments using data instance of Data struct, and not via passing all it fields -.-
+ - implemented button logic to stop the timer
+ - trying to implement countdown on SwitchCell that the timer will get denceared
+ - i changed a bit how seconds update, just one field that holds it, not seperated through 2 fields
 
+*/

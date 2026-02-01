@@ -13,9 +13,9 @@ pub struct StaticComp {
    pub switch_cell: SwitchCell,
 }
 impl StaticComp {
-    pub fn display(&self, ui: &mut egui::Ui) {
-        self.work_cell.display(ui);
-        self.rest_cell.display(ui);
-        self.switch_cell.display(ui);
+    pub fn display(&self, ui: &mut egui::Ui, secs: &mut u64, mins: &u64, hors: &u64) {
+        self.work_cell.display(ui,secs,mins,hors);
+        self.rest_cell.display(ui,secs,mins,hors);
+        self.switch_cell.display(ui,secs,mins,hors);
     }
 }

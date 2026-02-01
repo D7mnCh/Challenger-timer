@@ -10,7 +10,6 @@ use crate::intrective_components::rest_button::*;
 use crate::intrective_components::work_button::*;
 use crate::intrective_components::*;
 
-use std::thread::*;
 use std::time::*;
 
 fn main() -> eframe::Result {
@@ -58,20 +57,33 @@ impl State {
     }
     fn update_time_meseurment(&mut self) {
         // Math logic
-        self.data.seconds = self.data.reference_instant.elapsed().as_secs(); // -> getting seconds
-        self.data.minutes = self.data.seconds / 60; 
-        self.data.hours   = self.data.seconds / 3600;
+        self.data.seconds = self.data.reference_instant.elapsed().as_secs() /* + self.data.secs */;
+        self.data.minutes = self.data.seconds / 60 ; 
+        self.data.hours   = self.data.seconds / (60 * 60) ;
     }
 }
 impl eframe::App for State {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+        ctx.request_repaint();
         self.update_time_meseurment();
-        println!("{:02}:{:02}:{:02}",self.data.hours % 24, self.data.minutes % 60, self.data.seconds % 60);
-
         egui::CentralPanel::default().show(ctx, |ui| {
-            /* .. */
-            self.static_comp.display(ui)
-            //self.static_comp.display(ui,self.data,seconds);
+            self.static_comp.display(
+                ui,
+                &mut self.data.seconds,
+                &self.data.minutes, 
+                &self.data.hours);
+            self.intr_comp.display(
+                ui,
+                &mut self.data.seconds,
+                &self.data.minutes, 
+                &self.data.hours)
         });
     }
 }
+/* 
+    the plan
+ - put the data in the structs that use it
+ - ok so i faced a problem of the update don't appear only if i haver my mouse the window, or when i made a keyboard input (solved)
+ - implementing buttoms to stop the secs (i could use other Instant checkpoint thing and then substract it on the main one)
+*/
+

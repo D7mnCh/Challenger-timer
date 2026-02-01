@@ -7,12 +7,12 @@ use crate::SwitchCell;
 use crate::WorkCell;
 
 #[derive(Default)]
-pub struct DeadComp {
-    work_cell: WorkCell,
-    rest_cell: RestCell,
-    switch_cell: SwitchCell,
+pub struct StaticComp {
+   pub work_cell: WorkCell,
+   pub rest_cell: RestCell,
+   pub switch_cell: SwitchCell,
 }
-impl DeadComp {
+impl StaticComp {
     pub fn display(&self, ui: &mut egui::Ui) {
         self.work_cell.display(ui);
         self.rest_cell.display(ui);

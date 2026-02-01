@@ -1,8 +1,8 @@
-mod dead_components;
-use crate::dead_components::rest_cell::*;
-use crate::dead_components::switch_cell::*;
-use crate::dead_components::work_cell::*;
-use crate::dead_components::*;
+mod static_components;
+use crate::static_components::rest_cell::*;
+use crate::static_components::switch_cell::*;
+use crate::static_components::work_cell::*;
+use crate::static_components::*;
 
 mod intrective_components;
 use crate::intrective_components::pause_button::*;
@@ -10,29 +10,10 @@ use crate::intrective_components::rest_button::*;
 use crate::intrective_components::work_button::*;
 use crate::intrective_components::*;
 
-mod thread_counter;
-use crate::thread_counter::*;
-
-use std::thread;
-use std::sync::mpsc;
-use std::time::Duration;
+use std::thread::*;
+use std::time::*;
 
 fn main() -> eframe::Result {
-    let (tx,rx) = mpsc::channel::<i32>();
-    spawn_thread_counter(tx);
-    // i wanna make that value get passed by reference to state struct
-    // i think to solve my problem don't use channels
-    let seconds = receive_secs(rx);
-
-    /*
-    loop{
-        let seconds = rx.recv().unwrap();
-        println!("this was printed from main: {}",seconds);
-        thread::sleep(Duration::from_secs(1));
-    }
-    */
-
-    // native options will modify the native window's behavior
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder {
             inner_size: Some(egui::Vec2 { x: 400.0, y: 400.0 }),
@@ -44,32 +25,53 @@ fn main() -> eframe::Result {
     eframe::run_native(
         "Timer",
         native_options,
-        Box::new(|cc| Ok(Box::new(State::new(cc,seconds)))),
+        Box::new(|cc| Ok(Box::new(State::new(cc)))),
     )
 }
-
-#[derive(Default)]
+struct Data {
+    reference_instant: Instant,
+    seconds: u64,
+    minutes: u64,
+    hours: u64,
+}
 struct State {
-    DeadComp: DeadComp,
-    IntrComp: IntrComp,
-    data: i32,
+    static_comp: StaticComp,
+    intr_comp: IntrComp,
+    data: Data,
 }
-
 impl State {
-    fn new(cc: &eframe::CreationContext<'_>,data: i32) -> Self {
-        Default::default()
+    fn new(cc: &eframe::CreationContext<'_>) -> Self {
+        Self {
+            data: Data{
+                reference_instant: Instant::now(),
+                seconds: 0,
+                minutes: 0,
+                hours: 0,
+            },
+            static_comp: StaticComp {
+                ..Default::default()
+            },
+            intr_comp: IntrComp{
+                ..Default::default()
+            }
+        }
     }
-    fn update_seconds() {
-        //
+    fn update_time_meseurment(&mut self) {
+        // Math logic
+        self.data.seconds = self.data.reference_instant.elapsed().as_secs(); // -> getting seconds
+        self.data.minutes = self.data.seconds / 60; 
+        self.data.hours   = self.data.seconds / 3600;
     }
 }
-
 impl eframe::App for State {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
-        // udpate seconds 
+        self.update_time_meseurment();
+        println!("{:02}:{:02}:{:02}",self.data.hours % 24, self.data.minutes % 60, self.data.seconds % 60);
+
         egui::CentralPanel::default().show(ctx, |ui| {
             /* .. */
-            self.DeadComp.display(ui)
+            self.static_comp.display(ui)
+            //self.static_comp.display(ui,self.data,seconds);
         });
     }
 }

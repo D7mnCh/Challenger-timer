@@ -1,20 +1,16 @@
 use egui::Ui;
 
-use std::time::*;
 use crate::Data;
-
+use std::time::*;
 
 #[derive(Default)]
-pub struct PauseButton{
-    pause: bool
-}
+pub struct PauseButton;
 impl PauseButton {
     pub fn display(&mut self, ui: &mut Ui, data: &mut Data) {
         if ui.button("Pause").clicked() {
-            //data.pre_conf_secs = data.secs;
-            self.pause = ! self.pause;
+            data.pause = ! data.pause;
         }
-        if self.pause {
+        if data.pause {
             data.instant = Instant::now();
         }
     }

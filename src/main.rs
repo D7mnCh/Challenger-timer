@@ -27,9 +27,16 @@ fn main() -> eframe::Result {
         Box::new(|cc| Ok(Box::new(State::new(cc)))),
     )
 }
-#[derive(Clone)]
+#[derive(Debug)]
+//struct Session; ??????
 struct Data {
-    // i think i need pause to be here in data that all components can share and interect with it
+    /*
+     // those two are seperate, the user can change work seconds and rest seconds
+       rest_secs: u64,
+       work_secs: u64
+    */
+    new_user_input: bool,
+    pause : bool,
     instant: Instant,
     secs: u64,
     mins: u64,
@@ -45,7 +52,9 @@ impl State {
         Self {
             data: Data {
                 instant: Instant::now(),
-                secs: 0,
+                new_user_input: true,
+                pause: false,
+                secs: 120,
                 mins: 0,
                 hours: 0,
             },
@@ -62,40 +71,36 @@ impl State {
             self.data.secs    += self.data.instant.elapsed().as_secs();
             self.data.mins    = self.data.secs / 60;
             self.data.hours   = self.data.secs / (60 * 60);
-
-            self.data.instant = Instant::now();
         }
     }
 }
 impl eframe::App for State {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         ctx.request_repaint();
+
         self.update_time_meseurment();
-        //
-        // begin here and solve this
-        // i wanna make self.data.instant have 1 as a value not bigger then that
-        // the self.data.secs have normal value or in other word he's the only who own the value of second
-        // i get an idea to updata it everytime here, using plus one to self.data.instant cause it will be always be zero
+
         egui::CentralPanel::default().show(ctx, |ui| {
             // whait, i can just the whole data struct, didn't think of that
+            self.intr_comp.display(
+                ui,
+                &mut self.data
+            );
             self.static_comp.display(
                 ui,
                 &mut self.data
             );
-            self.intr_comp.display(
-                ui,
-                &mut self.data
-            )
         });
+
+        self.data.new_user_input = false;
+        if self.data.instant.elapsed().as_secs() == 1 {
+            self.data.instant = Instant::now();
+        }
     }
 }
 /*
- *
-    the plan
- - Update a bit README
- - passing arguments using data instance of Data struct, and not via passing all it fields -.-
- - implemented button logic to stop the timer
- - trying to implement countdown on SwitchCell that the timer will get denceared
- - i changed a bit how seconds update, just one field that holds it, not seperated through 2 fields
-
+    - redisgne some of the main code
+    - finish half switch_cell file dispaly time decrement 
+    - add switch_buttons for working and rest session
+    - make switch to work session reset the timer 
 */

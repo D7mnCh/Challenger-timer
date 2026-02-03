@@ -10,6 +10,7 @@ use crate::Data;
 
 #[derive(Default)]
 pub struct StaticComp {
+    //those two structs gave there own seconds
     pub work_cell: WorkCell,
     pub rest_cell: RestCell,
     pub switch_cell: SwitchCell,

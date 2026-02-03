@@ -28,19 +28,21 @@ fn main() -> eframe::Result {
     )
 }
 #[derive(Debug)]
-//struct Session; ??????
+enum Session {
+    Work,
+    Rest
+}
+#[derive(Debug)]
 struct Data {
-    /*
-     // those two are seperate, the user can change work seconds and rest seconds
-       rest_secs: u64,
-       work_secs: u64
-    */
+    // for this field gonna reset secs
     new_user_input: bool,
+    //reset: bool,
     pause : bool,
     instant: Instant,
-    secs: u64,
-    mins: u64,
-    hours: u64,
+    session: Session,
+
+    rest_secs: u64,
+    work_secs: u64
 }
 struct State {
     static_comp: StaticComp,
@@ -53,10 +55,11 @@ impl State {
             data: Data {
                 instant: Instant::now(),
                 new_user_input: true,
+                //reset: false,
                 pause: false,
-                secs: 120,
-                mins: 0,
-                hours: 0,
+                session: Session::Work,
+                rest_secs: 5,
+                work_secs: 320,
             },
             static_comp: StaticComp {
                 ..Default::default()
@@ -66,22 +69,15 @@ impl State {
             },
         }
     }
-    fn update_time_meseurment(&mut self) {
-        if self.data.instant.elapsed().as_secs() == 1 {
-            self.data.secs    += self.data.instant.elapsed().as_secs();
-            self.data.mins    = self.data.secs / 60;
-            self.data.hours   = self.data.secs / (60 * 60);
-        }
+    fn get_user_input (&mut self) {
+        //..
     }
 }
 impl eframe::App for State {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         ctx.request_repaint();
 
-        self.update_time_meseurment();
-
         egui::CentralPanel::default().show(ctx, |ui| {
-            // whait, i can just the whole data struct, didn't think of that
             self.intr_comp.display(
                 ui,
                 &mut self.data
@@ -99,8 +95,11 @@ impl eframe::App for State {
     }
 }
 /*
-    - redisgne some of the main code
-    - finish half switch_cell file dispaly time decrement 
-    - add switch_buttons for working and rest session
-    - make switch to work session reset the timer 
+ - made every cell have independing self secs
+ - make switch work for rest and work session
+ - finished work and rest cells (for rest session it act differently but i like it)
+ - now user can manipulate secs both for rest and work
+
+ TODO
+ - maybe add audio ?
 */

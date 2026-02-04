@@ -16,9 +16,19 @@ pub struct StaticComp {
     pub switch_cell: SwitchCell,
 }
 impl StaticComp {
-    pub fn display(&mut self, ui: &mut egui::Ui,data : &mut Data) {
-        self.work_cell.display(ui, data);
-        self.rest_cell.display(ui, data);
-        self.switch_cell.display(ui, data);
+    pub fn display(&mut self, ui: &mut egui::Ui, data: &mut Data) {
+        /*
+        ui.vertical(|ui| {
+
+            ui.horizontal(|ui| {
+                self.switch_cell.display(ui, data);
+            });
+            ui.horizontal(|ui| {
+                self.work_cell.display(ui, data);
+                self.rest_cell.display(ui, data);
+            });
+
+        });
+        */
     }
 }

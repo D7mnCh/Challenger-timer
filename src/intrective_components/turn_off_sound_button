@@ -6,6 +6,11 @@ impl PauseButton {
     pub fn display(&mut self, ui: &mut egui::Ui, data: &mut Data) {
         if ui.button("Play/Pause").clicked() {
             data.pause = !data.pause;
+
+            // don't let access shutdown of sound
+            data.command = Command::Sound(SoundCommand::TurnOff);
+            data.command.process_with(&mut data.child_process);
         }
     }
 }
+

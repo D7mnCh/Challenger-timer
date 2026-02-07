@@ -1,3 +1,4 @@
+#![allow(warnings)]
 mod data;
 use crate::data::*;
 
@@ -14,11 +15,13 @@ use crate::intrective_components::rest_button::*;
 use crate::intrective_components::rest_secs_glider::*;
 use crate::intrective_components::work_button::*;
 use crate::intrective_components::work_secs_glider::*;
+use crate::intrective_components::turn_off_sound_button::*;
 
 fn main() -> eframe::Result {
     let native_options = eframe::NativeOptions {
+        //[1148.4063 122.40625]
         viewport: egui::ViewportBuilder {
-            inner_size: Some(egui::Vec2 { x: 400.0, y: 400.0 }),
+            inner_size: Some(egui::Vec2 { x: 370.0, y: 115.0 }),
             title: Some("Timer".to_owned()),
             ..Default::default()
         },
@@ -41,10 +44,14 @@ impl State {
             data: Data {
                 instant: std::time::Instant::now(),
                 reset_with_new_user_input: true,
-                //reset: false,
                 pause: true,
+
                 session: Session::Work,
-                rest_secs: 900,
+                command: Command::None,
+                child_process: None,
+
+                // 900
+                rest_secs: 0,
                 work_secs: 2700,
             },
             static_comp: StaticComp {
@@ -61,26 +68,11 @@ impl eframe::App for State {
         ctx.request_repaint();
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            /*
-            self.intr_comp.display(
-            ui,
-            &mut self.data
-            );
-            self.static_comp.display(
-            ui,
-            &mut self.data
-            );
-            */
-            // i think the bugs is hepping is because the functions mutatable borrow this ui thing
-            // i think it's only space, read what the author said about it
-            //ui.take_available_width();
             ui.vertical(|ui| {
-
-                ui.add_space(ctx.viewport_rect().max.y / 3.);
 
                 ui.horizontal(|ui| {
 
-                    ui.add_space(ctx.viewport_rect().max.x / 3.7);
+                    ui.add_space(ctx.viewport_rect().max.x / 4.);
 
                     self.static_comp.switch_cell.display(ui, &mut self.data);
                 });
@@ -90,49 +82,47 @@ impl eframe::App for State {
                 ui.horizontal(|ui| {
 
                     self.intr_comp.rest_button.display(ui, &mut self.data);
-
-                    //ui.add_space(10.);
-
                     self.intr_comp.pause_button.display(ui, &mut self.data);
-
-                    //ui.add_space(10.);
-
                     self.intr_comp.work_button.display(ui, &mut self.data);
 
-                    ui.add_space(ctx.viewport_rect().max.x / 50.);
                 });
 
-                ui.add_space(10.);
+                // make it here
+                ui.add_space(8.);
 
                 ui.horizontal(|ui| {
-                    ui.add_space(ctx.viewport_rect().max.x / 3.5);
+                    ui.add_space(ctx.viewport_rect().max.x / 3.2);
 
                     self.intr_comp.rest_secs_glider.display(ui, &mut self.data);
                     self.intr_comp.work_secs_glider.display(ui, &mut self.data);
+                    self.intr_comp.turn_off_sound_button.display(ui, &mut self.data);
                 });
-
-                ui.add_space(ctx.viewport_rect().max.y / 3.);
 
                 ui.horizontal(|ui| {
                     self.static_comp.work_cell.display(ui, &mut self.data);
 
-                    ui.add_space(ctx.viewport_rect().max.x / 2.8);
+                    ui.add_space(ctx.viewport_rect().max.x / 3.2);
 
                     self.static_comp.rest_cell.display(ui, &mut self.data);
                 });
             });
         });
-
+        println!("{}",ctx.viewport_rect().max);
         if self.data.instant.elapsed().as_secs() == 1 {
             self.data.instant = std::time::Instant::now();
         }
     }
 }
 /*
- - Redesign the code base so i can controll where i can put the ui (positioning)
+ - made Command eumm
  TODO
  - don't know how to finish this project, i am kinda want the pommodoro
- - if you want to fix Ui, for now fix the look not the possion, if you want to fully fix it, you need to redesign your code
-    - what i know for location you need to depend on Layouts, and for size use "add_sized" instead of "add"
- - maybe add audio ?
+ - fix the Ui to be at the bottom to display at the bottom for D7mnch, i can make it differ if someone else 
+ - keyboard support
+ - make command enum in different file
+ NOTE (bugs)
+ - if you exit the app with the midia player being played it will hid the cursor (half solved, prompted reset)
+ - when suspending my pc, the app will crach with seconds went too fast to below 0(overflow) in less then 1 second
+ - when the sound finished, turn off button will still
+ - if the sound ends it still display the media palyer still running but with zero cpu usage(i want to remove them in runtime, only one if sound is active)
 */

@@ -1,5 +1,4 @@
-use crate::Data;
-use crate::Session;
+use crate::data::*;
 
 #[derive(Default, Debug)]
 pub struct SwitchCell {
@@ -26,7 +25,6 @@ impl SwitchCell {
             }
         }
     }
-
     pub fn display(&mut self, ui: &mut egui::Ui, data: &mut Data) {
         self.update_time(data);
 
@@ -41,7 +39,9 @@ impl SwitchCell {
                         self.work_secs -= data.instant.elapsed().as_secs();
                     } else {
                         data.pause = true;
-                        // pop a sound
+
+                        data.command = Command::Sound(SoundCommand::Play);
+                        data.command.process_with(&mut data.child_process);
                     }
                 }
                 Session::Rest => {
@@ -49,7 +49,9 @@ impl SwitchCell {
                         self.rest_secs -= data.instant.elapsed().as_secs();
                     } else {
                         data.pause = true;
-                        // pop a sound
+
+                        data.command = Command::Sound(SoundCommand::Play);
+                        data.command.process_with(&mut data.child_process);
                     }
                 }
             }

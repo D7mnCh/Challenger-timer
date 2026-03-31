@@ -1,4 +1,4 @@
-use crate::data::*;
+use crate::data::Data;
 
 #[derive(Default)]
 pub struct PauseButton;

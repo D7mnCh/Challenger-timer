@@ -1,5 +1,9 @@
 use crate::data::*;
 
+// i need to fix something here when i suspend my laptop bug
+// i think i'll fix the bug here
+// it could be in the main mod
+
 #[derive(Default, Debug)]
 pub struct SwitchCell {
     // i should give them initial values from data
@@ -35,6 +39,7 @@ impl SwitchCell {
         if data.pause == false {
             match data.session {
                 Session::Work => {
+                    //check to play sound
                     if self.work_secs > 0 {
                         self.work_secs -= data.instant.elapsed().as_secs();
                     } else {
@@ -45,6 +50,7 @@ impl SwitchCell {
                     }
                 }
                 Session::Rest => {
+                    //check to play sound
                     if self.rest_secs > 0 {
                         self.rest_secs -= data.instant.elapsed().as_secs();
                     } else {
@@ -64,7 +70,11 @@ impl SwitchCell {
                     self.mins % 60,
                     self.work_secs % 60
                 );
-                ui.label(egui::RichText::new(degital_clock).color(egui::Color32::RED).code());
+                ui.label(
+                    egui::RichText::new(degital_clock)
+                        .color(egui::Color32::RED)
+                        .code(),
+                );
             }
             Session::Rest => {
                 let degital_clock = format!(
@@ -73,7 +83,11 @@ impl SwitchCell {
                     self.mins % 60,
                     self.rest_secs % 60
                 );
-                ui.label(egui::RichText::new(degital_clock).color(egui::Color32::GREEN).code());
+                ui.label(
+                    egui::RichText::new(degital_clock)
+                        .color(egui::Color32::GREEN)
+                        .code(),
+                );
             }
         }
     }

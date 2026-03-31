@@ -9,20 +9,22 @@ use crate::static_components::work_cell::*;
 use crate::static_components::*;
 
 mod intrective_components;
-use crate::intrective_components::IntrComp;
 use crate::intrective_components::pause_button::*;
 use crate::intrective_components::rest_button::*;
 use crate::intrective_components::rest_secs_glider::*;
+use crate::intrective_components::turn_off_sound_button::*;
 use crate::intrective_components::work_button::*;
 use crate::intrective_components::work_secs_glider::*;
-use crate::intrective_components::turn_off_sound_button::*;
+use crate::intrective_components::IntrComp;
 
 fn main() -> eframe::Result {
     let native_options = eframe::NativeOptions {
-        //[1148.4063 122.40625]
+        //[1148.4063 163.8125] wide window
+        //[370, 115] tiny floating window
         viewport: egui::ViewportBuilder {
             inner_size: Some(egui::Vec2 { x: 370.0, y: 115.0 }),
             title: Some("Timer".to_owned()),
+            resizable: Some(false),
             ..Default::default()
         },
         ..Default::default()
@@ -50,8 +52,7 @@ impl State {
                 command: Command::None,
                 child_process: None,
 
-                // 900
-                rest_secs: 0,
+                rest_secs: 900,
                 work_secs: 2700,
             },
             static_comp: StaticComp {
@@ -69,9 +70,7 @@ impl eframe::App for State {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.vertical(|ui| {
-
                 ui.horizontal(|ui| {
-
                     ui.add_space(ctx.viewport_rect().max.x / 4.);
 
                     self.static_comp.switch_cell.display(ui, &mut self.data);
@@ -80,11 +79,9 @@ impl eframe::App for State {
                 ui.add_space(10.);
 
                 ui.horizontal(|ui| {
-
                     self.intr_comp.rest_button.display(ui, &mut self.data);
                     self.intr_comp.pause_button.display(ui, &mut self.data);
                     self.intr_comp.work_button.display(ui, &mut self.data);
-
                 });
 
                 // make it here
@@ -95,7 +92,9 @@ impl eframe::App for State {
 
                     self.intr_comp.rest_secs_glider.display(ui, &mut self.data);
                     self.intr_comp.work_secs_glider.display(ui, &mut self.data);
-                    self.intr_comp.turn_off_sound_button.display(ui, &mut self.data);
+                    self.intr_comp
+                        .turn_off_sound_button
+                        .display(ui, &mut self.data);
                 });
 
                 ui.horizontal(|ui| {
@@ -107,22 +106,29 @@ impl eframe::App for State {
                 });
             });
         });
-        println!("{}",ctx.viewport_rect().max);
+        println!("{}", ctx.viewport_rect().max);
+        // NOTE if device suspended, self.data.instant.elapsed().as_secs() will get
+        // more then 1
+        if self.data.instant.elapsed().as_secs() > 1 {
+            self.data.pause = true;
+            self.data.instant = std::time::Instant::now();
+        }
         if self.data.instant.elapsed().as_secs() == 1 {
             self.data.instant = std::time::Instant::now();
         }
     }
 }
 /*
- - made Command eumm
  TODO
- - don't know how to finish this project, i am kinda want the pommodoro
- - fix the Ui to be at the bottom to display at the bottom for D7mnch, i can make it differ if someone else 
+ - maybe make the app on the buttom of the top
+ - disable resizing
  - keyboard support
- - make command enum in different file
+ - i think i can pass only the data that i need to some methods like, not passing all data methods into that method
+ - web support
+ - IO improvment
  NOTE (bugs)
- - if you exit the app with the midia player being played it will hid the cursor (half solved, prompted reset)
+ - if you exit the app with the midia player being played it will hid the cursor
+    - `tput cnorm` to make cursor appear again
  - when suspending my pc, the app will crach with seconds went too fast to below 0(overflow) in less then 1 second
- - when the sound finished, turn off button will still
- - if the sound ends it still display the media palyer still running but with zero cpu usage(i want to remove them in runtime, only one if sound is active)
+ - when the sound finished, make the buttom to disapear
 */

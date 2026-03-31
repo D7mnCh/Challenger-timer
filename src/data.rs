@@ -4,15 +4,15 @@ pub enum Session {
     Rest,
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum Command {
     Sound(SoundCommand),
     None,
 }
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum SoundCommand {
-    Play, // i want this to give an id 
-    TurnOff // kill sound with that id from Play  variant
+    Play,
+    TurnOff,
 }
 
 #[derive(Debug)]
@@ -30,12 +30,12 @@ pub struct Data {
 }
 
 impl Command {
-    // acutally there is built in to kill that process, do i just over engeneering or something ?
-    // https://doc.rust-lang.org/std/process/struct.Child.html#method.kill
-    fn shutdown_sound(child_process: &mut Option<std::process::Child> ) {
-        if let Some(child_process) = child_process {
+    fn shutdown_sound(child_process: &mut Option<std::process::Child>) {
+        if let Some(child_process) = child_process.as_mut() {
             child_process.kill();
-        }else if let None = child_process{
+            // clean up the the zombie process after killed
+            child_process.wait();
+        } else if let None = child_process {
             println!("can't shutdown sound!")
         };
     }
@@ -46,19 +46,24 @@ impl Command {
             .join("App");
 
         #[cfg(not(target_family = "windows"))]
-        let command = std::process::Command::new("mpv")
-            .current_dir(path)
-            .args(["finish.wav","--no-audio-display"])
-            .spawn()
-            .expect("mpv failed to lunch");
-        *child_process = Some(command);
+        {
+            let command = std::process::Command::new("mpv")
+                .current_dir(path)
+                .args(["finish.wav", "--no-audio-display"])
+                .spawn()
+                .expect("mpv failed to lunch");
+            *child_process = Some(command);
+        }
 
-        //i might have a problem here on windows platform
         #[cfg(target_family = "windows")]
         {
+            println!("windows PATH : {path:?}");
             let command = std::process::Command::new("powershell")
                 .current_dir(path)
-                .args(["-c","(New-Object Media.SoundPlayer '.\\finish.wav').PlaySync();" ])
+                .args([
+                    "-c",
+                    "(New-Object Media.SoundPlayer '.\\finish.wav').PlaySync();",
+                ])
                 .spawn()
                 .expect("powershell failed to start or the problem could be in args");
 
@@ -66,20 +71,20 @@ impl Command {
         }
     }
 
-    pub fn process_with (&self, child_process: &mut Option<std::process::Child>) {
+    pub fn process_with(&self, child_process: &mut Option<std::process::Child>) {
         match self {
             Command::Sound(sound_command) => match sound_command {
-                SoundCommand::Play =>{ 
+                SoundCommand::Play => {
                     println!("sound on");
                     Self::play_sound(child_process);
-                },
+                }
                 // actually, this variant depend on the other one, i can't run it if the the sound
                 // is off
-                SoundCommand::TurnOff =>{
-                    println!("sound turn off");
+                SoundCommand::TurnOff => {
+                    println!("\nsound turn off");
                     Self::shutdown_sound(child_process);
                 }
-            }
+            },
             Command::None => println!("No command at the moment"),
         }
     }

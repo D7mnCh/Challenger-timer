@@ -15,8 +15,8 @@ impl RestCell {
     }
     pub fn display(&mut self, ui: &mut egui::Ui, data: &mut Data) {
         self.update_time(data);
-        if data.reset_totals {
-            data.reset_totals != data.reset_totals;
+        if data.reset_totals == true {
+            //data.reset_totals = false;
             self.secs = 0;
         }
         if data.pause == false {
@@ -26,7 +26,7 @@ impl RestCell {
         }
 
         let degital_clock = format!(
-            "Total rest: {:02}:{:02}:{:02}",
+            "Total rest  : {:02}:{:02}:{:02}",
             self.hours % 24,
             self.mins % 60,
             self.secs % 60

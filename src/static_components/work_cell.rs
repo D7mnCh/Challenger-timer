@@ -16,7 +16,7 @@ impl WorkCell {
     pub fn display(&mut self, ui: &mut Ui, data: &mut Data) {
         self.update_time(data);
         if data.reset_totals == true {
-            data.reset_totals = false;
+            //data.reset_totals = false;
             self.secs = 0;
         }
         if data.pause == false {

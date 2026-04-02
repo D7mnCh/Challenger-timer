@@ -14,13 +14,20 @@ pub enum SoundCommand {
     Play,
     TurnOff,
 }
-
+#[derive(Debug, PartialEq)]
+pub enum Sound {
+    MainRoundFinished,
+    BonusRoundFinished,
+    Rest,
+}
 #[derive(Debug)]
 pub struct Data {
+    // NOTE maybe i can remove this field
     pub reset_with_new_user_input: bool,
     pub pause: bool,
     pub reset_totals: bool,
     pub instant: std::time::Instant,
+    pub sound: Sound,
 
     pub session: Session,
     pub command: Command,
@@ -33,27 +40,28 @@ pub struct Data {
 impl Command {
     fn shutdown_sound(child_process: &mut Option<std::process::Child>) {
         if let Some(child_process) = child_process.as_mut() {
-            child_process.kill();
+            let _ = child_process.kill();
             // clean up the the zombie process after killed
-            child_process.wait();
+            let _ = child_process.wait();
         } else if let None = child_process {
             println!("can't shutdown sound!")
         };
     }
 
-    fn play_sound(child_process: &mut Option<std::process::Child>) {
+    fn play_sound(child_process: &mut Option<std::process::Child>, sound: &mut Sound) {
         let path = std::env::current_dir().unwrap().join("sounds");
-        //println!("The current directory is {}", path.display());
+        let sound: &str = match sound {
+            Sound::MainRoundFinished => "main_round.wav",
+            Sound::BonusRoundFinished => "bonus_round.wav",
+            Sound::Rest => "end_rest.wav",
+        };
 
-        //let path = std::env::home_dir()
-        //    .expect("could not found home directory")
-        //    .join("App");
-
-        #[cfg(not(target_family = "windows"))]
+        #[cfg(target_family = "unix")]
         {
             let command = std::process::Command::new("mpv")
                 .current_dir(path)
-                .args(["finish.wav", "--no-audio-display"])
+                // NOTE if program crash, still show me the terminal cursor
+                .args([sound, "--no-audio-display", "--no-terminal"])
                 .spawn()
                 .expect("mpv failed to lunch");
             *child_process = Some(command);
@@ -61,12 +69,14 @@ impl Command {
 
         #[cfg(target_family = "windows")]
         {
+            let command_arg = format!("(New-Object Media.SoundPlayer '.\\{}').PlaySync();", sound);
             println!("windows PATH : {path:?}");
             let command = std::process::Command::new("powershell")
                 .current_dir(path)
                 .args([
                     "-c",
-                    "(New-Object Media.SoundPlayer '.\\finish.wav').PlaySync();",
+                    // NOTE to change
+                    command_arg,
                 ])
                 .spawn()
                 .expect("powershell failed to start or the problem could be in args");
@@ -75,12 +85,12 @@ impl Command {
         }
     }
 
-    pub fn process_with(&self, child_process: &mut Option<std::process::Child>) {
+    pub fn process_with(&self, child_process: &mut Option<std::process::Child>, sound: &mut Sound) {
         match self {
             Command::Sound(sound_command) => match sound_command {
                 SoundCommand::Play => {
                     println!("sound on");
-                    Self::play_sound(child_process);
+                    Self::play_sound(child_process, sound);
                 }
                 // actually, this variant depend on the other one, i can't run it if the the sound
                 // is off

@@ -13,7 +13,8 @@ impl TurnOffSoundButton {
         if data.command == Command::Sound(SoundCommand::Play) {
             if ui.button("Turn off sound").clicked() {
                 data.command = Command::Sound(SoundCommand::TurnOff);
-                data.command.process_with(&mut data.child_process);
+                data.command
+                    .process_with(&mut data.child_process, &mut data.sound);
             }
         }
     }

@@ -1,6 +1,6 @@
-#![allow(warnings)]
+//#![allow(warnings)]
 mod data;
-use crate::data::{Command, Data, Session};
+use crate::data::{Command, Data, Session, Sound};
 
 mod static_components;
 use crate::static_components::rest_cell::*;
@@ -20,10 +20,12 @@ use crate::intrective_components::IntrComp;
 
 fn main() -> eframe::Result {
     let native_options = eframe::NativeOptions {
-        //[1148.4063 163.8125] wide window
         //[370, 115] tiny floating window
         viewport: egui::ViewportBuilder {
-            inner_size: Some(egui::Vec2 { x: 370.0, y: 115.0 }),
+            inner_size: Some(egui::Vec2 {
+                x: 1150.0,
+                y: 195.0,
+            }),
             title: Some("Timer".to_owned()),
             resizable: Some(false),
             ..Default::default()
@@ -47,15 +49,16 @@ impl State {
             data: Data {
                 instant: std::time::Instant::now(),
                 reset_with_new_user_input: true,
-                pause: true,
                 reset_totals: false,
+                pause: true,
 
+                sound: Sound::MainRoundFinished,
                 session: Session::Work,
                 command: Command::None,
                 child_process: None,
 
                 rest_secs: 300,
-                work_secs: 2700,
+                work_secs: 3,
             },
             static_comp: StaticComp {
                 ..Default::default()
@@ -67,46 +70,63 @@ impl State {
     }
 }
 impl eframe::App for State {
-    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         ctx.request_repaint();
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.vertical(|ui| {
+                ui.add_space(5.0);
                 ui.horizontal(|ui| {
-                    ui.add_space(ctx.viewport_rect().max.x / 4.);
-
+                    ui.add_space(490.0);
                     self.static_comp.switch_cell.display(ui, &mut self.data);
                 });
 
-                ui.add_space(10.);
+                ui.add_space(10.0);
 
                 ui.horizontal(|ui| {
+                    ui.add_space(435.0);
+                    ui.group(|ui| {
+                        ui.add_space(75.0);
+                        ui.vertical(|ui| {
+                            self.static_comp.work_cell.display(ui, &mut self.data);
+                            ui.add_space(5.0);
+                            self.static_comp.rest_cell.display(ui, &mut self.data);
+                        });
+                        ui.add_space(75.0);
+                    });
+                });
+                // NOTE didn't like i put this logic here where should be only
+                //ui code
+                if self.data.reset_totals == true {
+                    self.data.reset_totals = false
+                }
+
+                ui.add_space(10.0);
+
+                ui.horizontal(|ui| {
+                    ui.add_space(400.0);
                     self.intr_comp.rest_button.display(ui, &mut self.data);
                     self.intr_comp.pause_button.display(ui, &mut self.data);
                     self.intr_comp.work_button.display(ui, &mut self.data);
                 });
 
-                // make it here
-                ui.add_space(8.);
+                ui.add_space(8.0);
 
                 ui.horizontal(|ui| {
-                    ui.add_space(ctx.viewport_rect().max.x / 3.0);
-
+                    ui.add_space(520.0);
                     self.intr_comp.rest_secs_glider.display(ui, &mut self.data);
                     self.intr_comp.work_secs_glider.display(ui, &mut self.data);
+                });
+
+                ui.add_space(8.0);
+
+                ui.horizontal(|ui| {
+                    ui.add_space(400.0);
+                    self.intr_comp.reset_totals.display(ui, &mut self.data);
+                    ui.add_space(175.0);
                     self.intr_comp
                         .turn_off_sound_button
                         .display(ui, &mut self.data);
-                });
-
-                ui.horizontal(|ui| {
-                    self.static_comp.work_cell.display(ui, &mut self.data);
-                    ui.add_space(ctx.viewport_rect().max.x / 20.0);
-
-                    self.intr_comp.reset_totals.display(ui, &mut self.data);
-
-                    ui.add_space(ctx.viewport_rect().max.x / 20.0);
-                    self.static_comp.rest_cell.display(ui, &mut self.data);
                 });
             });
         });
@@ -125,22 +145,23 @@ impl eframe::App for State {
 /*
 
  TODO
- - maybe if i finish the 45 mintes go to 15 and then when finsiehd go back to 45
+ - change play/pause buttom to only one, and make color for each
+ - when paused show a only statics, if not then show them all just like
+ the current one
+ - delete "turn off sound" cause i will choose sounds with 3 secs long
  - maybe make the app on the buttom of the top
  - keyboard support
  - i think i can pass only the data that i need to some methods like, not passing all data methods into that method
  - web support
  - IO improvment
- - i want a buttom to reset the totals for rest and work session
- - make the sound on my app directory (put my app on a pkg, aka directory)
  - add click sounds
- - switch to 15 minutes after 45 minutes is done (for now 15 minutes do it
- on rest session)
+ - switch to 15 minutes after 45 minutes is done (don't make 15 minutes on
+  rest session)
+ - when the sound finished, make the buttom to disapear
  NOTE (bugs)
+ - sometimes the timer will freeze for one second or even more then that
  - the program you are building is for you after all, the features you will add
  is based on your needs
- - what the final product is gonna be
  - if you exit the app with the midia player being played it will hid the cursor
-    - `tput cnorm` to make cursor appear again
- - when the sound finished, make the buttom to disapear
+    - `reset` to make cursor appear again
 */

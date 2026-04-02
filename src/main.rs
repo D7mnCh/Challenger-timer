@@ -1,6 +1,6 @@
 #![allow(warnings)]
 mod data;
-use crate::data::*;
+use crate::data::{Command, Data, Session};
 
 mod static_components;
 use crate::static_components::rest_cell::*;
@@ -10,6 +10,7 @@ use crate::static_components::*;
 
 mod intrective_components;
 use crate::intrective_components::pause_button::*;
+use crate::intrective_components::reset_totals::*;
 use crate::intrective_components::rest_button::*;
 use crate::intrective_components::rest_secs_glider::*;
 use crate::intrective_components::turn_off_sound_button::*;
@@ -47,12 +48,13 @@ impl State {
                 instant: std::time::Instant::now(),
                 reset_with_new_user_input: true,
                 pause: true,
+                reset_totals: false,
 
                 session: Session::Work,
                 command: Command::None,
                 child_process: None,
 
-                rest_secs: 900,
+                rest_secs: 300,
                 work_secs: 2700,
             },
             static_comp: StaticComp {
@@ -88,7 +90,7 @@ impl eframe::App for State {
                 ui.add_space(8.);
 
                 ui.horizontal(|ui| {
-                    ui.add_space(ctx.viewport_rect().max.x / 3.2);
+                    ui.add_space(ctx.viewport_rect().max.x / 3.0);
 
                     self.intr_comp.rest_secs_glider.display(ui, &mut self.data);
                     self.intr_comp.work_secs_glider.display(ui, &mut self.data);
@@ -99,14 +101,16 @@ impl eframe::App for State {
 
                 ui.horizontal(|ui| {
                     self.static_comp.work_cell.display(ui, &mut self.data);
+                    ui.add_space(ctx.viewport_rect().max.x / 20.0);
 
-                    ui.add_space(ctx.viewport_rect().max.x / 3.2);
+                    self.intr_comp.reset_totals.display(ui, &mut self.data);
 
+                    ui.add_space(ctx.viewport_rect().max.x / 20.0);
                     self.static_comp.rest_cell.display(ui, &mut self.data);
                 });
             });
         });
-        println!("{}", ctx.viewport_rect().max);
+        //println!("{}", ctx.viewport_rect().max);
         // NOTE if device suspended, self.data.instant.elapsed().as_secs() will get
         // more then 1
         if self.data.instant.elapsed().as_secs() > 1 {
@@ -119,16 +123,24 @@ impl eframe::App for State {
     }
 }
 /*
+
  TODO
+ - maybe if i finish the 45 mintes go to 15 and then when finsiehd go back to 45
  - maybe make the app on the buttom of the top
- - disable resizing
  - keyboard support
  - i think i can pass only the data that i need to some methods like, not passing all data methods into that method
  - web support
  - IO improvment
+ - i want a buttom to reset the totals for rest and work session
+ - make the sound on my app directory (put my app on a pkg, aka directory)
+ - add click sounds
+ - switch to 15 minutes after 45 minutes is done (for now 15 minutes do it
+ on rest session)
  NOTE (bugs)
+ - the program you are building is for you after all, the features you will add
+ is based on your needs
+ - what the final product is gonna be
  - if you exit the app with the midia player being played it will hid the cursor
     - `tput cnorm` to make cursor appear again
- - when suspending my pc, the app will crach with seconds went too fast to below 0(overflow) in less then 1 second
  - when the sound finished, make the buttom to disapear
 */

@@ -1,5 +1,4 @@
-use crate::Data;
-use crate::Session;
+use crate::data::{Data, Session};
 
 #[derive(Default)]
 pub struct WorkButton;

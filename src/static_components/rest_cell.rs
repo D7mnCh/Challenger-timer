@@ -15,7 +15,10 @@ impl RestCell {
     }
     pub fn display(&mut self, ui: &mut egui::Ui, data: &mut Data) {
         self.update_time(data);
-
+        if data.reset_totals {
+            data.reset_totals != data.reset_totals;
+            self.secs = 0;
+        }
         if data.pause == false {
             if let Session::Rest = data.session {
                 self.secs += data.instant.elapsed().as_secs();

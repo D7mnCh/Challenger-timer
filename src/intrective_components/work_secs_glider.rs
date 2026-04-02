@@ -15,12 +15,14 @@ impl WorkSecsGlider {
     }
 
     pub fn display(&mut self, ui: &mut egui::Ui, data: &mut Data) {
+        let range = 1.0..120.0;
         self.get_user_saved_input(data);
         ui.add_sized(
             [20., 20.],
             egui::DragValue::new(&mut self.work_mins)
                 .speed(0.1)
-                .prefix("Work: "),
+                .prefix("Work: ")
+                .range(1.0..=120.0),
         );
         self.secs_converter(data);
     }

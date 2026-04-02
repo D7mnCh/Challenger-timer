@@ -19,11 +19,12 @@ pub enum SoundCommand {
 pub struct Data {
     pub reset_with_new_user_input: bool,
     pub pause: bool,
+    pub reset_totals: bool,
     pub instant: std::time::Instant,
-    pub child_process: Option<std::process::Child>,
 
     pub session: Session,
     pub command: Command,
+    pub child_process: Option<std::process::Child>,
 
     pub rest_secs: u64,
     pub work_secs: u64,
@@ -41,9 +42,12 @@ impl Command {
     }
 
     fn play_sound(child_process: &mut Option<std::process::Child>) {
-        let path = std::env::home_dir()
-            .expect("could not found home directory")
-            .join("App");
+        let path = std::env::current_dir().unwrap().join("sounds");
+        //println!("The current directory is {}", path.display());
+
+        //let path = std::env::home_dir()
+        //    .expect("could not found home directory")
+        //    .join("App");
 
         #[cfg(not(target_family = "windows"))]
         {

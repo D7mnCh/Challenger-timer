@@ -15,6 +15,10 @@ impl WorkCell {
     }
     pub fn display(&mut self, ui: &mut Ui, data: &mut Data) {
         self.update_time(data);
+        if data.reset_totals == true {
+            data.reset_totals = false;
+            self.secs = 0;
+        }
         if data.pause == false {
             if let Session::Work = data.session {
                 self.secs += data.instant.elapsed().as_secs();
@@ -28,7 +32,6 @@ impl WorkCell {
         );
         let degital_clock = degital_clock.as_str();
 
-        //ui.label(degital_clock);
         ui.label(egui::RichText::new(degital_clock).color(egui::Color32::DARK_RED));
     }
 }

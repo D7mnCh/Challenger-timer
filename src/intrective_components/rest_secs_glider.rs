@@ -21,7 +21,8 @@ impl RestSecsGlider {
             [20., 20.],
             egui::DragValue::new(&mut self.rest_mins)
                 .speed(0.1)
-                .prefix("Rest: "),
+                .prefix("Rest: ")
+                .range(1.0..=120.0),
         );
 
         self.secs_converter(data); // -> 90

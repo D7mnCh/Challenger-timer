@@ -23,10 +23,7 @@ fn main() -> eframe::Result {
         //[1148.4063 163.8125] wide window
         //[370, 115] tiny floating window
         viewport: egui::ViewportBuilder {
-            inner_size: Some(egui::Vec2 {
-                x: 1150.0,
-                y: 195.0,
-            }),
+            inner_size: Some(egui::Vec2 { x: 370.0, y: 195.0 }),
             title: Some("Timer".to_owned()),
             resizable: Some(false),
             ..Default::default()
@@ -75,16 +72,16 @@ impl eframe::App for State {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.vertical(|ui| {
-                ui.add_space(5.0);
+                ui.add_space(6.0);
                 ui.horizontal(|ui| {
-                    ui.add_space(490.0);
+                    ui.add_space(90.0);
                     self.static_comp.switch_cell.display(ui, &mut self.data);
                 });
 
                 ui.add_space(10.0);
 
                 ui.horizontal(|ui| {
-                    ui.add_space(435.0);
+                    ui.add_space(35.0);
                     ui.group(|ui| {
                         ui.add_space(75.0);
                         ui.vertical(|ui| {
@@ -104,7 +101,6 @@ impl eframe::App for State {
                 ui.add_space(10.0);
 
                 ui.horizontal(|ui| {
-                    ui.add_space(400.0);
                     self.intr_comp.rest_button.display(ui, &mut self.data);
                     self.intr_comp.pause_button.display(ui, &mut self.data);
                     self.intr_comp.work_button.display(ui, &mut self.data);
@@ -113,7 +109,7 @@ impl eframe::App for State {
                 ui.add_space(8.0);
 
                 ui.horizontal(|ui| {
-                    ui.add_space(520.0);
+                    ui.add_space(115.0);
                     self.intr_comp.rest_secs_glider.display(ui, &mut self.data);
                     self.intr_comp.work_secs_glider.display(ui, &mut self.data);
                 });
@@ -121,7 +117,6 @@ impl eframe::App for State {
                 ui.add_space(8.0);
 
                 ui.horizontal(|ui| {
-                    ui.add_space(400.0);
                     self.intr_comp.reset_totals.display(ui, &mut self.data);
                     ui.add_space(175.0);
                     self.intr_comp
@@ -130,7 +125,7 @@ impl eframe::App for State {
                 });
             });
         });
-        println!("{}", ctx.viewport_rect().max);
+        //println!("{}", ctx.viewport_rect().max);
         // NOTE if device suspended, self.data.instant.elapsed().as_secs() will get
         // more then 1
         if self.data.instant.elapsed().as_secs() > 1 {

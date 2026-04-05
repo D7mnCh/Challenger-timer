@@ -31,6 +31,10 @@ impl WorkCell {
         );
         let degital_clock = degital_clock.as_str();
 
-        ui.label(egui::RichText::new(degital_clock).color(egui::Color32::DARK_RED));
+        ui.label(
+            egui::RichText::new(degital_clock)
+                .color(egui::Color32::DARK_RED)
+                .size(15.0),
+        );
     }
 }

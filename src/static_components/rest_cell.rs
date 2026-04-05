@@ -29,7 +29,10 @@ impl RestCell {
             self.secs % 60
         );
         let degital_clock = degital_clock.as_str();
-        //ui.label(degital_clock);
-        ui.label(egui::RichText::new(degital_clock).color(egui::Color32::DARK_GREEN));
+        ui.label(
+            egui::RichText::new(degital_clock)
+                .color(egui::Color32::DARK_GREEN)
+                .size(15.0),
+        );
     }
 }

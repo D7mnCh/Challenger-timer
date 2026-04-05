@@ -1,7 +1,8 @@
 use crate::data::*;
 
+// NOTE i think switch cell is now intrective and not static, when i drag the value
+//it will update
 #[derive(Default, Debug)]
-//NOTE for iniailization, use default trait
 pub struct SwitchCell {
     work_secs: u64,
     rest_secs: u64,
@@ -9,7 +10,6 @@ pub struct SwitchCell {
     hours: u64,
     round: Round,
 }
-// NOTE round one with 45 mins, then the sec with 15
 #[derive(Default, Debug, PartialEq)]
 pub enum Round {
     #[default]
@@ -38,20 +38,20 @@ impl SwitchCell {
                         Round::Main => {
                             if self.work_secs == 0 {
                                 //play sound
-                                data.command = Command::Sound(SoundCommand::Play);
+                                data.command = Command::PlaySound;
                                 data.sound = Sound::MainRoundFinished;
                                 data.command
                                     .process_with(&mut data.child_process, &mut data.sound);
 
                                 self.round = Round::Bonus;
-                                self.work_secs = 2;
+                                self.work_secs = 900;
                             }
                         }
 
                         Round::Bonus => {
                             if self.work_secs == 0 {
                                 //play sound
-                                data.command = Command::Sound(SoundCommand::Play);
+                                data.command = Command::PlaySound;
                                 data.sound = Sound::BonusRoundFinished;
                                 data.command
                                     .process_with(&mut data.child_process, &mut data.sound);
@@ -77,7 +77,7 @@ impl SwitchCell {
 
                         //play sound
                         data.sound = Sound::Rest;
-                        data.command = Command::Sound(SoundCommand::Play);
+                        data.command = Command::PlaySound;
                         data.command
                             .process_with(&mut data.child_process, &mut data.sound);
                     }
@@ -93,33 +93,29 @@ impl SwitchCell {
 
         self.update_time(data);
 
-        match data.session {
-            Session::Work => {
-                let degital_clock = format!(
-                    "Work session: {:02}:{:02}:{:02}",
-                    self.hours % 24,
-                    self.mins % 60,
-                    self.work_secs % 60
-                );
-                ui.label(
-                    egui::RichText::new(degital_clock)
-                        .color(egui::Color32::RED)
-                        .code(),
-                );
-            }
-            Session::Rest => {
-                let degital_clock = format!(
-                    "Rest session: {:02}:{:02}:{:02}",
-                    self.hours % 24,
-                    self.mins % 60,
-                    self.rest_secs % 60
-                );
-                ui.label(
-                    egui::RichText::new(degital_clock)
-                        .color(egui::Color32::GREEN)
-                        .code(),
-                );
-            }
+        let (color, which_session, secs) = match data.session {
+            Session::Work => (data.work_color, "Work", self.work_secs),
+            Session::Rest => (data.rest_color, "Rest", self.rest_secs),
+        };
+        let degital_clock = format!(
+            "{} session: {:02}:{:02}:{:02}",
+            which_session,
+            self.hours % 24,
+            self.mins % 60,
+            secs % 60,
+        );
+        let mut cell_size;
+        if data.pause == false {
+            cell_size = 60.0;
+        } else {
+            cell_size = 16.0;
         }
+
+        ui.label(
+            egui::RichText::new(degital_clock)
+                .color(color)
+                .strong()
+                .size(cell_size),
+        );
     }
 }
